@@ -52,6 +52,40 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			.last-updated-on {
 				font-style: italic;
 			}
+			.author-info {
+				display: flex;
+				align-items: center;
+				gap: 1.25em;
+				margin-top: 3em;
+				padding: 1.5em;
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.author-info img {
+				width: 96px;
+				height: 96px;
+				flex: 0 0 96px;
+				border-radius: 50%;
+				object-fit: cover;
+			}
+			.author-info h2 {
+				margin: 0 0 0.35em;
+				font-size: 1.25em;
+			}
+			.author-info p {
+				margin: 0;
+			}
+			@media (max-width: 480px) {
+				.author-info {
+					align-items: flex-start;
+					gap: 1em;
+					padding: 1.25em 0;
+				}
+				.author-info img {
+					width: 72px;
+					height: 72px;
+					flex-basis: 72px;
+				}
+			}
 		</style>
 	</head>
 
@@ -76,6 +110,16 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 						<hr />
 					</div>
 					<slot />
+					<section class="author-info" aria-labelledby="author-name">
+						<img src="/fionn-avatar.svg" alt="Illustrated portrait of Fionn" />
+						<div>
+							<h2 id="author-name">About the author: Fionn</h2>
+							<p>
+								Fionn is a curious writer who enjoys exploring technology, sharing what he learns, and
+								finding the useful ideas in everyday life.
+							</p>
+						</div>
+					</section>
 				</div>
 			</article>
 		</main>
