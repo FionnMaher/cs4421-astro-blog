@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
+    "test:unit": "vitest run",
+    "lint": "eslint .",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -21,6 +23,14 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "typescript": "^6.0.3"
+    "@typescript-eslint/parser": "^8.71.1",
+    "eslint": "^10.12.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "jiti": "^2.7.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.4"
+  },
+  "allowScripts": {
+    "eslint-plugin-astro@3.2.1": true
   }
 }
