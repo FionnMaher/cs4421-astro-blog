@@ -7,29 +7,30 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "check": "astro check",
-    "test:unit": "vitest",
-    "lint": "eslint .",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "eslint .",
+    "test:unit": "vitest --exclude **/cdk/**",
+    "check": "astro check"
   },
   "dependencies": {
-    "@astrojs/mdx": "^8.0.3",
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/mdx": "^8.0.1",
+    "@astrojs/node": "^11.1.6",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.8",
-    "sharp": "^0.35.0"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@typescript-eslint/parser": "^8.71.1",
-    "eslint": "^10.12.0",
-    "eslint-plugin-astro": "^3.2.1",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.4"
+    "astro": "^7.3.2",
+    "sharp": "^0.35.0",
+    "typescript": "^6.0.3"
   },
   "allowScripts": {
-    "eslint-plugin-astro@3.2.1": true
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "vitest": "^5.0.1"
   }
 }
