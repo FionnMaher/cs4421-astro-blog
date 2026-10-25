@@ -1,0 +1,160 @@
+---
+interface Props {
+	slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<section class="post-reactions" data-post-reactions data-slug={slug} aria-label="Post reactions">
+	<p class="prompt">Was this post useful?</p>
+	<div class="buttons" role="group" aria-label="Rate this post">
+		<button type="button" data-reaction="like" aria-pressed="false" disabled>
+			<span aria-hidden="true">👍</span> Like <span data-count>0</span>
+		</button>
+		<button type="button" data-reaction="dislike" aria-pressed="false" disabled>
+			<span aria-hidden="true">👎</span> Dislike <span data-count>0</span>
+		</button>
+	</div>
+	<p class="status" data-status aria-live="polite">Loading reactions…</p>
+</section>
+
+<style>
+	.post-reactions {
+		margin: 2em 0;
+		padding: 1.25em;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 12px;
+		text-align: center;
+	}
+	.prompt {
+		margin: 0 0 0.85em;
+		font-weight: 700;
+	}
+	.buttons {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 0.75em;
+	}
+	button {
+		padding: 0.6em 1em;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 999px;
+		background: white;
+		color: rgb(var(--gray-dark));
+		font: inherit;
+		cursor: pointer;
+	}
+	button[aria-pressed='true'] {
+		border-color: var(--accent);
+		background: var(--accent);
+		color: white;
+	}
+	button:disabled {
+		cursor: wait;
+		opacity: 0.65;
+	}
+	button:focus-visible {
+		outline: 3px solid var(--accent);
+		outline-offset: 3px;
+	}
+	.status {
+		min-height: 1.5em;
+		margin: 0.75em 0 0;
+		color: rgb(var(--gray));
+		font-size: 0.9em;
+	}
+</style>
+
+<script>
+	interface ReactionState {
+		likes: number;
+		dislikes: number;
+		reaction: 'like' | 'dislike' | null;
+	}
+
+	async function readState(response: Response): Promise<ReactionState> {
+		const body: unknown = await response.json();
+		if (!response.ok) {
+			const message =
+				typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
+					? body.error
+					: 'Unable to load reactions';
+			throw new Error(message);
+		}
+		if (
+			typeof body !== 'object' ||
+			body === null ||
+			!('likes' in body) ||
+			typeof body.likes !== 'number' ||
+			!Number.isSafeInteger(body.likes) ||
+			body.likes < 0 ||
+			!('dislikes' in body) ||
+			typeof body.dislikes !== 'number' ||
+			!Number.isSafeInteger(body.dislikes) ||
+			body.dislikes < 0 ||
+			!('reaction' in body) ||
+			(body.reaction !== 'like' && body.reaction !== 'dislike' && body.reaction !== null)
+		) {
+			throw new Error('Received an invalid reaction response');
+		}
+		return { likes: body.likes, dislikes: body.dislikes, reaction: body.reaction };
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-post-reactions]').forEach((panel) => {
+		const slug = panel.dataset.slug;
+		const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>('button[data-reaction]'));
+		const status = panel.querySelector<HTMLElement>('[data-status]');
+		if (!slug || !status) return;
+
+		const setState = (state: ReactionState) => {
+			for (const button of buttons) {
+				const reaction = button.dataset.reaction;
+				button.setAttribute('aria-pressed', String(reaction === state.reaction));
+				const count = button.querySelector<HTMLElement>('[data-count]');
+				if (count) count.textContent = String(reaction === 'like' ? state.likes : state.dislikes);
+			}
+		};
+
+		const endpoint = `/api/reactions/${encodeURIComponent(slug)}`;
+		void fetch(endpoint)
+			.then(readState)
+			.then((state) => {
+				setState(state);
+				status.textContent = 'Your feedback is saved.';
+				buttons.forEach((button) => (button.disabled = false));
+			})
+			.catch((error: unknown) => {
+				status.textContent = error instanceof Error ? error.message : 'Unable to load reactions';
+				buttons.forEach((button) => (button.disabled = false));
+			});
+
+		buttons.forEach((button) => {
+			button.addEventListener('click', async () => {
+				const current = buttons.find((candidate) => candidate.getAttribute('aria-pressed') === 'true')
+					?.dataset.reaction;
+				const clicked = button.dataset.reaction;
+				if (clicked !== 'like' && clicked !== 'dislike') return;
+				const reaction = current === clicked ? null : clicked;
+				buttons.forEach((candidate) => (candidate.disabled = true));
+				status.textContent = 'Saving your feedback…';
+
+				try {
+					const response = await fetch(endpoint, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ reaction }),
+					});
+					const state = await readState(response);
+					setState(state);
+					status.textContent = 'Your feedback is saved.';
+				} catch (error) {
+					status.textContent = error instanceof Error ? error.message : 'Unable to save reaction';
+				} finally {
+					buttons.forEach((candidate) => (candidate.disabled = false));
+				}
+			});
+		});
+	});
+</script>

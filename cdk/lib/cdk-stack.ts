@@ -3,6 +3,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class StaticSiteStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -10,6 +11,16 @@ export class StaticSiteStack extends cdk.Stack {
     const siteBucket = new s3.Bucket(this, 'SiteBucket', {
     removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+    });
+
+    const reactionsTable = new dynamodb.Table(this, 'ReactionsTable', {
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+    new cdk.CfnOutput(this, 'ReactionsTableName', {
+      value: reactionsTable.tableName,
     });
 
     const rewriteFunction = new cloudfront.Function(this, 'IndexRewriteFunction', {

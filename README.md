@@ -54,6 +54,20 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## Post reactions
+
+Published blog posts support one like or dislike per anonymous reader. Reactions
+are stored in DynamoDB so counts are shared between readers and survive
+container restarts. The CDK stack creates a pay-per-request table and outputs
+its generated name as `ReactionsTableName`.
+
+Set `REACTIONS_TABLE_NAME` on the Astro server to that output and configure
+`AWS_REGION` to the table's region. The server's AWS credentials or task role
+need `dynamodb:GetItem`, `dynamodb:TransactGetItems`, and
+`dynamodb:TransactWriteItems` access to the table.
+The AWS SDK uses its standard credential provider chain, so local development
+can use configured AWS credentials as well.
+
 ## 👀 Want to learn more?
 
 Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
