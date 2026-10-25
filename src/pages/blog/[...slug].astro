@@ -9,7 +9,7 @@ const Content = post ? (await render(post)).Content : undefined;
 ---
 
 {post && Content ? (
-	<BlogPost {...post.data}>
+	<BlogPost {...post.data} slug={post.id}>
 		<Content />
 	</BlogPost>
 ) : (
