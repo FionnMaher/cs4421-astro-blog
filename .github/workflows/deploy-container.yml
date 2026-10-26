@@ -36,7 +36,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           IMAGE_URI=$ECR_REGISTRY/docker/astro-blog:$IMAGE_TAG
-          docker build --platform linux/amd64 -t "$IMAGE_URI" .
+          docker build --platform linux/arm64 -t "$IMAGE_URI" .
           docker push "$IMAGE_URI"
 
       - name: Install CDK dependencies
