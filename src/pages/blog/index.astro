@@ -8,7 +8,9 @@ import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	(a, b) =>
+		(a.id === 'markdown-style-guide' ? -1 : b.id === 'markdown-style-guide' ? 1 : 0) ||
+		b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 const gameImages: Record<string, string> = {
 	'first-post': '/game-images/snake.jpeg',
@@ -16,6 +18,8 @@ const gameImages: Record<string, string> = {
 	'third-post': '/game-images/pacman.jpeg',
 	'fourth-post': '/game-images/tetris.jpeg',
 	'markdown-style-guide': '/game-images/game-history.jpeg',
+	'minecraft-history': '/game-images/minecraft.jpeg',
+	'mario-history': '/game-images/mario.jpeg',
 };
 ---
 
