@@ -9,20 +9,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run test:unit # 1. Quality Gate
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies and run unit tests
+        run: npm ci && npm run test:unit
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-north-1
+
+      - name: Verify Amazon ECR repository exists
+        run: aws ecr describe-repositories --repository-names docker/astro-blog
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
       - name: Build, Tag & Push Image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/docker/astro-blog:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/docker/astro-blog:$IMAGE_TAG
+          IMAGE_URI=$ECR_REGISTRY/docker/astro-blog:$IMAGE_TAG
+          docker build --platform linux/amd64 -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+
+      - name: Install CDK dependencies
+        working-directory: cdk
+        run: npm ci
+      - name: Deploy container service to ECS Fargate
+        working-directory: cdk
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: npx cdk --app "npx tsx bin/container.ts" deploy AstroBlogContainerStack --require-approval never -c imageTag="$IMAGE_TAG"

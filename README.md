@@ -68,6 +68,21 @@ need `dynamodb:GetItem`, `dynamodb:TransactGetItems`, and
 The AWS SDK uses its standard credential provider chain, so local development
 can use configured AWS credentials as well.
 
+## Container deployment
+
+The `Deploy Container to AWS` GitHub Actions workflow builds the Docker image,
+pushes it to the existing ECR repository `docker/astro-blog` in `eu-north-1`,
+and deploys that exact commit-tagged image to the `AstroBlogContainerStack`
+ECS Fargate service. The stack provisions a public load balancer, Fargate
+cluster/service, and the DynamoDB table used by post reactions. Its `BlogUrl`
+CloudFormation output is the deployed site URL.
+
+The workflow requires `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` GitHub
+secrets. The AWS identity must be able to push to the ECR repository and deploy
+the CDK stack, including creating/updating ECS, networking, IAM, DynamoDB, and
+load-balancer resources. Bootstrap CDK once in the target account and region
+before the first deployment with `cd cdk && npx cdk bootstrap aws://456774513196/eu-north-1`.
+
 ## 👀 Want to learn more?
 
 Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
