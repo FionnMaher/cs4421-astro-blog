@@ -10,6 +10,13 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const gameImages: Record<string, string> = {
+	'first-post': '/game-images/snake.jpeg',
+	'second-post': '/game-images/pong.png',
+	'third-post': '/game-images/pacman.jpeg',
+	'fourth-post': '/game-images/tetris.jpeg',
+	'markdown-style-guide': '/game-images/game-history.jpeg',
+};
 ---
 
 <!doctype html>
@@ -47,8 +54,13 @@ const posts = (await getCollection('blog')).sort(
 				font-size: 2.369rem;
 			}
 			ul li img {
+				display: block;
+				width: 100%;
+				aspect-ratio: 2;
 				margin-bottom: 0.5rem;
 				border-radius: 12px;
+				background: #111;
+				object-fit: contain;
 			}
 			ul li a {
 				display: block;
@@ -91,19 +103,40 @@ const posts = (await getCollection('blog')).sort(
 		<main>
 			<section>
 				<ul>
-					{posts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage && (
-									<Image width={720} height={360} src={post.data.heroImage} alt="" />
-								)}
-								<h4 class="title">{post.data.title}</h4>
-								<p class="date">
-									<FormattedDate date={post.data.pubDate} />
-								</p>
-							</a>
-						</li>
-					))}
+					{posts.map((post) => {
+						const gameImage = gameImages[post.id];
+						const heroImage = post.data.heroImage;
+
+						return (
+							<li>
+								<a href={`/blog/${post.id}/`}>
+									{gameImage ? (
+										<img
+											src={gameImage}
+											alt={post.data.heroImageAlt ?? `${post.data.title} featured image`}
+											width="720"
+											height="360"
+											loading="lazy"
+											decoding="async"
+										/>
+									) : (
+										heroImage && (
+											<Image
+												width={720}
+												height={360}
+												src={heroImage}
+												alt={post.data.heroImageAlt ?? `${post.data.title} featured image`}
+											/>
+										)
+									)}
+									<h4 class="title">{post.data.title}</h4>
+									<p class="date">
+										<FormattedDate date={post.data.pubDate} />
+									</p>
+								</a>
+							</li>
+						);
+					})}
 				</ul>
 			</section>
 		</main>

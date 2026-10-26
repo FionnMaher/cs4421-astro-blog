@@ -9,7 +9,7 @@ import PostReactions from '../components/PostReactions.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & { slug?: string };
 
-const { title, description, pubDate, updatedDate, heroImage, slug } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, heroImageAlt, slug } = Astro.props;
 ---
 
 <html lang="en">
@@ -95,7 +95,14 @@ const { title, description, pubDate, updatedDate, heroImage, slug } = Astro.prop
 		<main>
 			<article>
 				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+					{heroImage && (
+						<Image
+							width={1020}
+							height={510}
+							src={heroImage}
+							alt={heroImageAlt ?? `${title} featured image`}
+						/>
+					)}
 				</div>
 				<div class="prose">
 					<div class="title">
