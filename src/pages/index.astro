@@ -9,50 +9,146 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			main {
+				width: calc(100% - 2em);
+				max-width: 960px;
+				margin: 0 auto;
+				padding: 3em 0 4em;
+			}
+			.hero {
+				padding: clamp(2em, 7vw, 4.5em);
+				border-radius: 20px;
+				background: linear-gradient(135deg, #173b64, #276b82);
+				color: white;
+				box-shadow: var(--box-shadow);
+			}
+			.eyebrow {
+				margin: 0 0 0.75em;
+				color: #c2e7a5;
+				font-size: 0.9em;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+			}
+			.hero h1 {
+				max-width: 720px;
+				margin: 0;
+				font-size: clamp(2.4em, 7vw, 4.5em);
+				line-height: 1.05;
+			}
+			.hero-copy {
+				max-width: 650px;
+				margin: 1.25em 0 0;
+				color: #e4eff4;
+				font-size: 1.2em;
+				line-height: 1.6;
+			}
+			.actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75em;
+				margin-top: 2em;
+			}
+			.actions a {
+				display: inline-block;
+				padding: 0.8em 1.2em;
+				border: 2px solid white;
+				border-radius: 999px;
+				color: #173b64;
+				background: white;
+				font-weight: 700;
+				text-decoration: none;
+			}
+			.actions a.secondary {
+				color: white;
+				background: transparent;
+			}
+			.themes {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 1.25em;
+				margin-top: 2.5em;
+			}
+			.theme-card {
+				padding: 1.5em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 14px;
+				background: white;
+				box-shadow: var(--box-shadow);
+			}
+			.theme-card h2 {
+				margin: 0 0 0.5em;
+				color: rgb(var(--black));
+				font-size: 1.3em;
+			}
+			.theme-card p {
+				margin: 0;
+				color: rgb(var(--gray));
+				line-height: 1.6;
+			}
+			.latest {
+				margin-top: 3em;
+				padding: 1.5em;
+				border-left: 4px solid #78a94d;
+				background: rgb(var(--gray-light));
+			}
+			.latest h2 {
+				margin: 0 0 0.5em;
+			}
+			.latest p {
+				margin: 0;
+			}
+			.latest a {
+				color: rgb(var(--accent));
+				font-weight: 700;
+			}
+			@media (max-width: 600px) {
+				main {
+					padding-top: 1.5em;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to
-				build a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your{' '}
-				<code>astro.config.mjs</code> file. You can customize your setup with{' '}
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like
-				Tailwind, React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>
-					Edit this page in <code>src/pages/index.astro</code>
-				</li>
-				<li>
-					Edit the site header items in <code>src/components/Header.astro</code>
-				</li>
-				<li>
-					Add your name to the footer in <code>src/components/Footer.astro</code>
-				</li>
-				<li>
-					Check out the included blog posts in <code>src/content/blog/</code>
-				</li>
-				<li>
-					Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code>
-				</li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to{' '}
-				<a href="https://docs.astro.build/">read the docs</a> or{' '}
-				<a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out{' '}
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a> by{' '}
-				<a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="hero">
+				<p class="eyebrow">Play · Create · Connect</p>
+				<h1>The stories and history behind video games</h1>
+				<p class="hero-copy">
+					Explore how games have grown from simple arcade challenges into rich worlds for
+					imagination, creativity, and connection. Discover the people, ideas, and technology
+					that make games matter.
+				</p>
+				<div class="actions">
+					<a href="/blog">Explore the blog</a>
+					<a class="secondary" href="/demo">Play a demo</a>
+				</div>
+			</section>
+
+			<section class="themes" aria-label="What this blog explores">
+				<article class="theme-card">
+					<h2>Game history</h2>
+					<p>Follow the evolution of games and the technology and culture that shaped them.</p>
+				</article>
+				<article class="theme-card">
+					<h2>Creative worlds</h2>
+					<p>Look at how game design, art, sound, and storytelling invite players to take part.</p>
+				</article>
+				<article class="theme-card">
+					<h2>Why games matter</h2>
+					<p>Explore how play can bring people together, spark ideas, and create lasting memories.</p>
+				</article>
+			</section>
+
+			<section class="latest">
+				<h2>Start exploring</h2>
+				<p>
+					Read <a href="/about">why video games matter</a>, browse the <a href="/blog">latest posts</a>,
+					or try the <a href="/demo">Snake game demo</a>.
+				</p>
+			</section>
 		</main>
 		<Footer />
 	</body>
