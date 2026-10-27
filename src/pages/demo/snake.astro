@@ -360,9 +360,6 @@ import { SITE_TITLE } from '../../consts';
 				};
 
 				const startGame = () => {
-					if (startButton.disabled) {
-						return;
-					}
 					if (crashTimer) {
 						window.clearTimeout(crashTimer);
 						crashTimer = null;

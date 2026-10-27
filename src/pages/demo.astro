@@ -4,12 +4,13 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
 
-const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5', 'Game 6'];
+const gamePlaceholders = ['Game 2', 'Game 3'];
+---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Demo | ${SITE_TITLE}`} description="Play a browser-based Snake game." />
+		<BaseHead title={`Demo | ${SITE_TITLE}`} description="A preview of games coming soon." />
 		<style>
 			main {
 				width: calc(100% - 2em);
@@ -33,6 +34,14 @@ const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5', 'Gam
 				background: white;
 				box-shadow: var(--box-shadow);
 			}
+			.game-placeholder {
+				display: grid;
+				min-height: 180px;
+				place-items: center;
+				background: rgb(var(--gray-light));
+				color: rgb(var(--gray-dark));
+				font-size: 1.25em;
+			}
 			.game-link {
 				display: block;
 				color: inherit;
@@ -43,15 +52,6 @@ const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5', 'Gam
 				width: 100%;
 				height: 180px;
 				object-fit: cover;
-				background: #dff7a5;
-			}
-			.game-placeholder {
-				display: grid;
-				min-height: 180px;
-				place-items: center;
-				background: rgb(var(--gray-light));
-				color: rgb(var(--gray-dark));
-				font-size: 1.25em;
 			}
 			.game-details {
 				padding: 1em;
@@ -71,21 +71,24 @@ const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5', 'Gam
 		<main>
 			<section class="intro">
 				<h1>Game Demo</h1>
-				<p>Try the first playable game below.</p>
+				<p>Choose a game to play. More demos are coming soon!</p>
 			</section>
 			<section class="games" aria-label="Game demos">
-				{gameCards.map((game) => (
+				<article class="game-card">
+					<a class="game-link" href="/demo/snake" aria-label="Play Snake">
+						<img class="game-image" src="/game-images/snake.jpeg" alt="Snake game preview" />
+					</a>
+					<div class="game-details">
+						<h2>Snake</h2>
+						<p>Use the arrow keys to eat apples and avoid obstacles.</p>
+					</div>
+				</article>
+				{gamePlaceholders.map((game) => (
 					<article class="game-card">
-						{game.type === 'snake' ? (
-							<a class="game-link" href={game.href}>
-								<img class="game-image" src={game.image} alt="Snake game preview" />
-							</a>
-						) : (
-							<div class="game-placeholder" aria-hidden="true">Coming soon</div>
-						)}
+						<div class="game-placeholder" aria-hidden="true">Coming soon</div>
 						<div class="game-details">
-							<h2>{game.name}</h2>
-							<p>{game.details}</p>
+							<h2>{game}</h2>
+							<p>A new game demo will be available here in the future.</p>
 						</div>
 					</article>
 				))}
