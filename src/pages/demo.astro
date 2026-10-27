@@ -1,0 +1,79 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3'];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Demo | ${SITE_TITLE}`} description="A preview of games coming soon." />
+		<style>
+			main {
+				width: calc(100% - 2em);
+				max-width: 960px;
+				margin: 0 auto;
+				padding: 2em 0;
+			}
+			.intro {
+				margin-bottom: 2em;
+				text-align: center;
+			}
+			.games {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 1.5em;
+			}
+			.game-card {
+				overflow: hidden;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				background: white;
+				box-shadow: var(--box-shadow);
+			}
+			.game-placeholder {
+				display: grid;
+				min-height: 180px;
+				place-items: center;
+				background: rgb(var(--gray-light));
+				color: rgb(var(--gray-dark));
+				font-size: 1.25em;
+			}
+			.game-details {
+				padding: 1em;
+			}
+			.game-details h2,
+			.game-details p {
+				margin: 0;
+			}
+			.game-details p {
+				margin-top: 0.5em;
+				color: rgb(var(--gray));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="intro">
+				<h1>Game Demo</h1>
+				<p>Playable game demos are in the works. Check back soon to try them out!</p>
+			</section>
+			<section class="games" aria-label="Future game demos">
+				{gamePlaceholders.map((game) => (
+					<article class="game-card">
+						<div class="game-placeholder" aria-hidden="true">Coming soon</div>
+						<div class="game-details">
+							<h2>{game}</h2>
+							<p>A new game demo will be available here in the future.</p>
+						</div>
+					</article>
+				))}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
