@@ -4,13 +4,17 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
 
-const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3'];
+const gameCards = [
+	{ name: 'Snake', type: 'snake', details: 'Use the arrow keys to eat food and keep growing.', href: '/demo/snake', image: '/game-images/snake.jpeg' },
+	{ name: 'Game 2', type: 'placeholder', details: 'A new game demo will be available here in the future.', href: '#', image: '' },
+	{ name: 'Game 3', type: 'placeholder', details: 'A new game demo will be available here in the future.', href: '#', image: '' },
+];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Demo | ${SITE_TITLE}`} description="A preview of games coming soon." />
+		<BaseHead title={`Demo | ${SITE_TITLE}`} description="Play a browser-based Snake game." />
 		<style>
 			main {
 				width: calc(100% - 2em);
@@ -33,6 +37,18 @@ const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3'];
 				border-radius: 12px;
 				background: white;
 				box-shadow: var(--box-shadow);
+			}
+			.game-link {
+				display: block;
+				color: inherit;
+				text-decoration: none;
+			}
+			.game-image {
+				display: block;
+				width: 100%;
+				height: 180px;
+				object-fit: cover;
+				background: #dff7a5;
 			}
 			.game-placeholder {
 				display: grid;
@@ -60,15 +76,21 @@ const gamePlaceholders = ['Game 1', 'Game 2', 'Game 3'];
 		<main>
 			<section class="intro">
 				<h1>Game Demo</h1>
-				<p>Playable game demos are in the works. Check back soon to try them out!</p>
+				<p>Try the first playable game below.</p>
 			</section>
-			<section class="games" aria-label="Future game demos">
-				{gamePlaceholders.map((game) => (
+			<section class="games" aria-label="Game demos">
+				{gameCards.map((game) => (
 					<article class="game-card">
-						<div class="game-placeholder" aria-hidden="true">Coming soon</div>
+						{game.type === 'snake' ? (
+							<a class="game-link" href={game.href}>
+								<img class="game-image" src={game.image} alt="Snake game preview" />
+							</a>
+						) : (
+							<div class="game-placeholder" aria-hidden="true">Coming soon</div>
+						)}
 						<div class="game-details">
-							<h2>{game}</h2>
-							<p>A new game demo will be available here in the future.</p>
+							<h2>{game.name}</h2>
+							<p>{game.details}</p>
 						</div>
 					</article>
 				))}

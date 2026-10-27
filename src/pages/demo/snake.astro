@@ -1,0 +1,400 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Snake | ${SITE_TITLE}`} description="Play the Snake game." />
+		<style>
+			main {
+				max-width: 760px;
+				margin: 0 auto;
+				padding: 2rem 1rem 4rem;
+			}
+			.game-shell {
+				display: grid;
+				gap: 1rem;
+				justify-items: center;
+				padding: 1.5rem;
+				border-radius: 18px;
+				background: linear-gradient(135deg, #dff7a5, #b4e676);
+				box-shadow: var(--box-shadow);
+			}
+			.title-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 1rem;
+				width: 100%;
+				color: #1e3a15;
+				font-weight: 700;
+			}
+			.back-link {
+				color: #1e3a15;
+				text-decoration: none;
+				font-weight: 700;
+			}
+			.score-badge {
+				padding: 0.35rem 0.75rem;
+				border-radius: 999px;
+				background: rgba(30, 58, 21, 0.08);
+				font-size: 0.95rem;
+			}
+			.canvas-wrap {
+				position: relative;
+				width: min(80vw, 480px);
+			}
+			#snake-game {
+				display: block;
+				width: 100%;
+				aspect-ratio: 1;
+				border: 4px solid rgba(36, 73, 23, 0.8);
+				border-radius: 12px;
+				background: #a7d870;
+			}
+			.game-over {
+				position: absolute;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				padding: 1rem;
+				background: rgba(12, 17, 10, 0.7);
+				border-radius: 12px;
+				color: white;
+				text-align: center;
+				opacity: 1;
+				transition: opacity 0.2s ease;
+			}
+			.game-over.hidden {
+				opacity: 0;
+				pointer-events: none;
+			}
+			.game-over-card {
+				display: grid;
+				gap: 0.9rem;
+				padding: 1.25rem 1.5rem;
+				border-radius: 14px;
+				background: rgba(14, 27, 18, 0.8);
+			}
+			.game-over-card h2 {
+				margin: 0;
+				font-size: clamp(1.6rem, 3vw, 2.2rem);
+			}
+			.game-over-actions {
+				display: flex;
+				justify-content: center;
+				gap: 0.75rem;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.7rem 1.2rem;
+				border: none;
+				border-radius: 999px;
+				background: #2d7d42;
+				color: white;
+				font-weight: 700;
+				cursor: pointer;
+			}
+			button.secondary {
+				background: #e6eae2;
+				color: #1e3a15;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="game-shell" aria-label="Snake game section">
+				<div class="title-row">
+					<h1>Snake</h1>
+					<a class="back-link" href="/demo">← Back to demos</a>
+				</div>
+				<div class="title-row">
+					<span class="score-badge" id="snake-score">Score: 0</span>
+					<button id="snake-start" type="button">Start</button>
+				</div>
+				<div class="canvas-wrap">
+					<canvas id="snake-game" width="320" height="320" aria-label="Snake game board"></canvas>
+					<div id="game-over" class="game-over hidden" aria-live="polite">
+						<div class="game-over-card">
+							<h2>Game Over</h2>
+							<p>Final Score: <strong id="final-score">0</strong></p>
+							<div class="game-over-actions">
+								<button id="restart-game" type="button">Restart</button>
+								<a href="/demo"><button class="secondary" type="button">Back to Demos</button></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<Footer />
+		<script>
+			const canvas = document.getElementById('snake-game');
+			const scoreLabel = document.getElementById('snake-score');
+			const startButton = document.getElementById('snake-start');
+			const gameOverOverlay = document.getElementById('game-over');
+			const finalScore = document.getElementById('final-score');
+			const restartButton = document.getElementById('restart-game');
+			if (canvas && scoreLabel && startButton && gameOverOverlay && finalScore && restartButton) {
+				const ctx = canvas.getContext('2d');
+				const tileSize = 16;
+				const boardSize = canvas.width / tileSize;
+				const appleCount = 5;
+				const foodImage = new Image();
+				foodImage.src = '/game-images/snake.jpeg';
+
+				let snake = [];
+				let direction = { x: 1, y: 0 };
+				let nextDirection = { x: 1, y: 0 };
+				let foods = [];
+				let obstacles = [];
+				let score = 0;
+				let isRunning = false;
+				let intervalId = null;
+				let crashTimer = null;
+
+				const updateScore = () => {
+					scoreLabel.textContent = `Score: ${score}`;
+					finalScore.textContent = String(score);
+				};
+
+				const hideGameOver = () => {
+					gameOverOverlay.classList.add('hidden');
+				};
+
+				const showGameOver = () => {
+					finalScore.textContent = String(score);
+					gameOverOverlay.classList.remove('hidden');
+				};
+
+				const resetSnake = () => {
+					snake = [
+						{ x: 7, y: 10 },
+						{ x: 6, y: 10 },
+						{ x: 5, y: 10 },
+						{ x: 4, y: 10 },
+					];
+					direction = { x: 1, y: 0 };
+					nextDirection = { x: 1, y: 0 };
+					obstacles = [];
+					score = 0;
+					updateScore();
+					hideGameOver();
+					placeFood();
+				};
+
+				const createFoodAtValidPosition = () => {
+					return createAvailablePosition();
+				};
+
+				const placeFood = () => {
+					foods = [];
+					for (let index = 0; index < appleCount; index += 1) {
+						const position = createFoodAtValidPosition();
+						if (position) {
+							foods.push(position);
+						}
+					}
+				};
+
+				const createAvailablePosition = (keepClearOfHead = false) => {
+					const head = snake[0];
+					const availablePositions = [];
+
+					for (let x = 0; x < boardSize; x += 1) {
+						for (let y = 0; y < boardSize; y += 1) {
+							const occupiedBySnake = snake.some((segment) => segment.x === x && segment.y === y);
+							const occupiedByFood = foods.some((foodItem) => foodItem.x === x && foodItem.y === y);
+							const occupiedByObstacle = obstacles.some((obstacle) => obstacle.x === x && obstacle.y === y);
+							const tooCloseToHead =
+								keepClearOfHead && Math.abs(x - head.x) <= 3 && Math.abs(y - head.y) <= 3;
+
+							if (!occupiedBySnake && !occupiedByFood && !occupiedByObstacle && !tooCloseToHead) {
+								availablePositions.push({ x, y });
+							}
+						}
+					}
+
+					if (availablePositions.length === 0) {
+						return null;
+					}
+
+					return availablePositions[Math.floor(Math.random() * availablePositions.length)];
+				};
+
+				const spawnObstacle = () => {
+					const position = createAvailablePosition(true);
+					if (position) {
+						obstacles.push(position);
+					}
+				};
+
+				const drawBoard = () => {
+					ctx.fillStyle = '#a7d870';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+					for (let x = 0; x < boardSize; x += 1) {
+						for (let y = 0; y < boardSize; y += 1) {
+							if ((x + y) % 2 === 0) {
+								ctx.fillStyle = 'rgba(255,255,255,0.08)';
+								ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+							}
+						}
+					}
+				};
+
+				const drawSnake = () => {
+					snake.forEach((segment, index) => {
+						const isCrashed = !isRunning && crashTimer !== null;
+						ctx.fillStyle = isCrashed ? '#777' : index === 0 ? '#1d4f91' : '#2b7ae7';
+						ctx.fillRect(segment.x * tileSize + 1, segment.y * tileSize + 1, tileSize - 2, tileSize - 2);
+						if (index === 0 && !isCrashed) {
+							ctx.fillStyle = '#fff';
+							ctx.beginPath();
+							ctx.arc(segment.x * tileSize + 7, segment.y * tileSize + 7, 2, 0, Math.PI * 2);
+							ctx.arc(segment.x * tileSize + 12, segment.y * tileSize + 7, 2, 0, Math.PI * 2);
+							ctx.fill();
+						}
+					});
+				};
+
+				const drawFood = () => {
+					foods.forEach((foodItem) => {
+						if (foodImage.complete) {
+							ctx.drawImage(
+								foodImage,
+								foodItem.x * tileSize - 1,
+								foodItem.y * tileSize - 1,
+								tileSize + 2,
+								tileSize + 2,
+							);
+							return;
+						}
+						ctx.fillStyle = '#d62728';
+						ctx.beginPath();
+						ctx.arc(
+							foodItem.x * tileSize + tileSize / 2,
+							foodItem.y * tileSize + tileSize / 2,
+							tileSize / 2 - 1,
+							0,
+							Math.PI * 2,
+						);
+						ctx.fill();
+					});
+				};
+
+				const drawObstacles = () => {
+					obstacles.forEach((obstacle) => {
+						const x = obstacle.x * tileSize;
+						const y = obstacle.y * tileSize;
+						ctx.fillStyle = '#52565a';
+						ctx.fillRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+						ctx.strokeStyle = '#34383b';
+						ctx.lineWidth = 2;
+						ctx.strokeRect(x + 2, y + 2, tileSize - 4, tileSize - 4);
+					});
+				};
+
+				const draw = () => {
+					drawBoard();
+					drawFood();
+					drawObstacles();
+					drawSnake();
+				};
+
+				const stopGame = () => {
+					isRunning = false;
+					if (intervalId) {
+						window.clearInterval(intervalId);
+						intervalId = null;
+					}
+					startButton.textContent = 'Restart';
+					crashTimer = window.setTimeout(() => {
+						showGameOver();
+					}, 1000);
+					startButton.disabled = true;
+				};
+
+				const tick = () => {
+					direction = nextDirection;
+					const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+					const hitWall = head.x < 0 || head.y < 0 || head.x >= boardSize || head.y >= boardSize;
+					const hitSelf = snake.some((segment) => segment.x === head.x && segment.y === head.y);
+					const hitObstacle = obstacles.some((obstacle) => obstacle.x === head.x && obstacle.y === head.y);
+
+					if (hitWall || hitSelf || hitObstacle) {
+						stopGame();
+						return;
+					}
+
+					snake.unshift(head);
+					const eatenFoodIndex = foods.findIndex((foodItem) => foodItem.x === head.x && foodItem.y === head.y);
+					if (eatenFoodIndex !== -1) {
+						foods.splice(eatenFoodIndex, 1);
+						score += 10;
+						updateScore();
+						spawnObstacle();
+						if (foods.length === 0) {
+							placeFood();
+						}
+					} else {
+						snake.pop();
+					}
+
+					draw();
+				};
+
+				const startGame = () => {
+					if (crashTimer) {
+						window.clearTimeout(crashTimer);
+						crashTimer = null;
+					}
+					hideGameOver();
+					resetSnake();
+					if (intervalId) {
+						window.clearInterval(intervalId);
+					}
+					isRunning = true;
+					startButton.textContent = 'Restart';
+					startButton.disabled = false;
+					intervalId = window.setInterval(tick, 140);
+					draw();
+				};
+
+				window.addEventListener('keydown', (event) => {
+					const keyMap = {
+						ArrowUp: { x: 0, y: -1 },
+						ArrowDown: { x: 0, y: 1 },
+						ArrowLeft: { x: -1, y: 0 },
+						ArrowRight: { x: 1, y: 0 },
+					};
+
+					const nextMove = keyMap[event.key];
+					if (!nextMove) {
+						return;
+					}
+
+					event.preventDefault();
+					const isOpposite = nextMove.x === -direction.x && nextMove.y === -direction.y;
+					if (!isOpposite) {
+						nextDirection = nextMove;
+					}
+
+					if (!isRunning) {
+						startGame();
+					}
+				});
+
+				startButton.addEventListener('click', startGame);
+				restartButton.addEventListener('click', startGame);
+				resetSnake();
+				draw();
+			}
+		</script>
+	</body>
+</html>
