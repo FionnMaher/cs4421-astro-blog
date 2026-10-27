@@ -146,7 +146,7 @@ import { SITE_TITLE } from '../../consts';
 				const boardSize = canvas.width / tileSize;
 				const appleCount = 5;
 				const foodImage = new Image();
-				foodImage.src = '/game-images/snake.jpeg';
+				startButton.disabled = true;
 
 				let snake = [];
 				let direction = { x: 1, y: 0 };
@@ -307,6 +307,16 @@ import { SITE_TITLE } from '../../consts';
 					drawSnake();
 				};
 
+				foodImage.onload = () => {
+					startButton.disabled = false;
+					draw();
+				};
+				foodImage.onerror = () => {
+					startButton.disabled = false;
+					draw();
+				};
+				foodImage.src = '/game-images/snake.jpeg';
+
 				const stopGame = () => {
 					isRunning = false;
 					if (intervalId) {
@@ -350,6 +360,9 @@ import { SITE_TITLE } from '../../consts';
 				};
 
 				const startGame = () => {
+					if (startButton.disabled) {
+						return;
+					}
 					if (crashTimer) {
 						window.clearTimeout(crashTimer);
 						crashTimer = null;
@@ -385,7 +398,7 @@ import { SITE_TITLE } from '../../consts';
 						nextDirection = nextMove;
 					}
 
-					if (!isRunning) {
+					if (!isRunning && !startButton.disabled) {
 						startGame();
 					}
 				});
