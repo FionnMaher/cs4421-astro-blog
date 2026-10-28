@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { logEvent } from './utils/logger';
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   const url = new URL(request.url);
@@ -15,15 +16,11 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     statusCode = response.status;
     return response;
   } finally {
-    console.info(
-      JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: statusCode >= 500 ? 'ERROR' : 'INFO',
-        route: url.pathname,
-        method: request.method,
-        statusCode,
-        latencyMs: Math.round(performance.now() - startedAt),
-      }),
-    );
+    logEvent(statusCode >= 500 ? 'ERROR' : statusCode >= 400 ? 'WARN' : 'INFO', 'api.request', {
+      route: url.pathname,
+      method: request.method,
+      statusCode,
+      latencyMs: Math.round(performance.now() - startedAt),
+    });
   }
 });

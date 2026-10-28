@@ -8,6 +8,7 @@ import {
 import type { APIRoute } from 'astro';
 import { randomUUID } from 'node:crypto';
 import { getEntry } from 'astro:content';
+import { logEvent } from '../../../utils/logger';
 import { getReactionDeltas, type Reaction } from '../../../utils/reactions';
 
 const readerCookie = 'blog_reader_id';
@@ -58,6 +59,10 @@ function countValue(value: unknown): number {
 		throw new Error('Stored reaction count is invalid');
 	}
 	return value;
+}
+
+function getErrorName(error: unknown): string {
+	return error instanceof Error ? error.name : 'UnknownError';
 }
 
 async function readReaction(
@@ -116,7 +121,10 @@ export const GET: APIRoute = async ({ params, cookies, request }) => {
 
 	const tableName = getTableName();
 	if (!tableName) {
-		console.error('REACTIONS_TABLE_NAME is not configured');
+		logEvent('ERROR', 'api.reactions.configuration_missing', {
+			operation: 'get',
+			setting: 'REACTIONS_TABLE_NAME',
+		});
 		return json({ error: 'Reactions are temporarily unavailable' }, 503);
 	}
 
@@ -124,7 +132,10 @@ export const GET: APIRoute = async ({ params, cookies, request }) => {
 		const readerId = getReaderId(cookies, new URL(request.url).protocol === 'https:');
 		return json(await responseState(tableName, `POST#${post.id}`, readerId));
 	} catch (error) {
-		console.error('Failed to read post reactions', error);
+		logEvent('ERROR', 'api.reactions.read_failed', {
+			postSlug: post.id,
+			errorName: getErrorName(error),
+		});
 		return json({ error: 'Unable to load reactions' }, 500);
 	}
 };
@@ -135,7 +146,10 @@ export const POST: APIRoute = async ({ params, cookies, request }) => {
 
 	const tableName = getTableName();
 	if (!tableName) {
-		console.error('REACTIONS_TABLE_NAME is not configured');
+		logEvent('ERROR', 'api.reactions.configuration_missing', {
+			operation: 'post',
+			setting: 'REACTIONS_TABLE_NAME',
+		});
 		return json({ error: 'Reactions are temporarily unavailable' }, 503);
 	}
 
@@ -227,7 +241,10 @@ export const POST: APIRoute = async ({ params, cookies, request }) => {
 
 		return json({ error: 'Reaction changed concurrently; please try again' }, 409);
 	} catch (error) {
-		console.error('Failed to save post reaction', error);
+		logEvent('ERROR', 'api.reactions.write_failed', {
+			postSlug: post.id,
+			errorName: getErrorName(error),
+		});
 		return json({ error: 'Unable to save reaction' }, 500);
 	}
 };
