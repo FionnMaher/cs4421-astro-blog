@@ -1,7 +1,8 @@
 import type { APIRoute } from 'astro';
+import { logEvent } from '../../../utils/logger';
 
 export const GET: APIRoute = () => {
-  console.info('readiness', 'ready');
+  logEvent('INFO', 'health.readiness', { status: 'ready' });
 
   return Response.json({
     status: 'ready',

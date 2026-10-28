@@ -1,8 +1,9 @@
 import type { APIRoute } from 'astro';
+import { logEvent } from '../../../utils/logger';
 
 export const GET: APIRoute = () => {
   const uptime = process.uptime();
-  console.info('liveness', 'ok', uptime);
+  logEvent('INFO', 'health.liveness', { status: 'ok', uptimeSeconds: uptime });
 
   return Response.json({
     status: 'ok',
